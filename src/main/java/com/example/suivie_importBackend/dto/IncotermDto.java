@@ -1,7 +1,5 @@
 package com.example.suivie_importBackend.dto;
 
-
-import com.example.suivie_importBackend.Enum.ModeTransport;
 import lombok.*;
 
 @AllArgsConstructor
@@ -10,9 +8,9 @@ import lombok.*;
 @Setter
 @Builder
 public class IncotermDto {
-    private Long id;
-    private String intercoterm;
-    private String signification;
-    private ModeTransport modeTransport;
-    private String responsableVendeur;
+    Long id;
+    String incoterm;
+    String signification;
+    Long modeTransportId;
+    Long responsableVendeurId;
 }

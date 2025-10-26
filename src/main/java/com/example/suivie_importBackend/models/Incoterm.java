@@ -1,6 +1,5 @@
 package com.example.suivie_importBackend.models;
 
-import com.example.suivie_importBackend.Enum.ModeTransport;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -12,10 +11,17 @@ import lombok.*;
 @Entity
 @Table(name = "intercoterm")
 public class Incoterm extends BaseM {
-    private String intercoterm;
+
+    @Column(nullable = false)
+    private String incoterm;
+
     private String signification;
-    @Enumerated(EnumType.STRING)
-    @Column(length = 20, nullable = false)
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "mode_transport_id", nullable = false)
     private ModeTransport modeTransport;
-    private String responsableVendeur;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "responsable_vendeur_id", nullable = false)
+    private ResponsableVendeur responsableVendeur;
 }

@@ -1,6 +1,5 @@
 package com.example.suivie_importBackend.models;
 
-import com.example.suivie_importBackend.Enum.TypeFournisseur;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -42,9 +41,11 @@ public class FournisseurM extends BaseM {
     private String statistiques2;
     @Column(name = "statistiques_3")
     private String statistiques3;
-    @Enumerated(EnumType.STRING)
-    @Column(length = 20, nullable = false)
-    private TypeFournisseur type = TypeFournisseur.SIMPLE;
+
+    @ManyToOne
+    @JoinColumn(name = "type_id")
+    private TypeFournisseur typeFournisseur;
+
     @ManyToOne
     @JoinColumn(name = "mode_paiement_id")
     private ModePaiement modePaiement;
@@ -53,15 +54,23 @@ public class FournisseurM extends BaseM {
     @JoinColumn(name = "devise_id")
     private Devise devise;
 
-    private String echeance;
+//    @ManyToOne
+//    @JoinColumn(name = "echeance_id")
+//    private Echeance echeance;
+
     private String iban;
+
     private String bic;
+
     @Column(name = "contact_Email")
     private String contactEmail;
+
     @Column(name = "contact_Fonction")
     private String contactFonction;
+
     @Column(name = "contact_Prenoms")
     private String contactPrenoms;
+
     @Column(name = "contact_Nom")
     private String contactNom;
 

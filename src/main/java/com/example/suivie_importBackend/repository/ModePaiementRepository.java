@@ -1,6 +1,8 @@
 package com.example.suivie_importBackend.repository;
 
 import com.example.suivie_importBackend.models.ModePaiement;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -12,5 +14,5 @@ public interface ModePaiementRepository extends JpaRepository<ModePaiement,Long>
 
     Optional<ModePaiement> findFirstByIdAndDeleted(Long id, Boolean deletion);
 
-    List<ModePaiement> findByDeleted(Boolean deletion);
+    Page<ModePaiement> findAllByDeleted(Boolean deletion, Pageable pageable);
 }

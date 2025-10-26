@@ -1,7 +1,6 @@
 package com.example.suivie_importBackend.service;
 
 import com.example.suivie_importBackend.Enum.Deletion;
-import com.example.suivie_importBackend.Enum.TypeFournisseur;
 import com.example.suivie_importBackend.dto.FournisseurDto;
 import com.example.suivie_importBackend.models.Devise;
 import com.example.suivie_importBackend.models.FournisseurM;
@@ -17,6 +16,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+
 import java.io.InputStream;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -29,7 +29,7 @@ public class FournisseurService {
     private final ModePaiementRepository modePaiementRepository;
     private final DeviseRepository deviseRepository;
 
-    public FournisseurService(FournisseurRepository fournisseurRepository, UserService userService, ModePaiementRepository modePaiementRepository,DeviseRepository deviseRepository) {
+    public FournisseurService(FournisseurRepository fournisseurRepository, UserService userService, ModePaiementRepository modePaiementRepository, DeviseRepository deviseRepository) {
         this.fournisseurRepository = fournisseurRepository;
         this.userService = userService;
         this.modePaiementRepository = modePaiementRepository;
@@ -66,7 +66,7 @@ public class FournisseurService {
         mapToEntity(fournisseurDto, fournisseur);
 
         fournisseur.setDeleted(Deletion.NO);
-        fournisseur.setType(fournisseurDto.getType() != null ? TypeFournisseur.valueOf(fournisseurDto.getType()) : TypeFournisseur.SIMPLE);
+//        fournisseur.setType(fournisseurDto.getType() != null ? TypeFournisseur.valueOf(fournisseurDto.getType()) : TypeFournisseur.SIMPLE);
 
         if (fournisseurDto.getModePaiementId() != null) {
             ModePaiement modePaiement = modePaiementRepository.findFirstByIdAndDeleted(fournisseurDto.getModePaiementId(), Deletion.NO)
@@ -215,9 +215,9 @@ public class FournisseurService {
         dto.setStatistiques1(fournisseur.getStatistiques1());
         dto.setStatistiques2(fournisseur.getStatistiques2());
         dto.setStatistiques3(fournisseur.getStatistiques3());
-        dto.setType(fournisseur.getType().name());
+//        dto.setType(fournisseur.getTypeFournisseur().getId());
         dto.setModePaiementId(fournisseur.getModePaiement().getId());
-        dto.setEcheance(fournisseur.getEcheance());
+//        dto.setEcheanceId(fournisseur.getEcheance().getId());
         dto.setIban(fournisseur.getIban());
         dto.setBic(fournisseur.getBic());
         dto.setContactEmail(fournisseur.getContactEmail());
@@ -246,7 +246,7 @@ public class FournisseurService {
         entity.setStatistiques1(dto.getStatistiques1());
         entity.setStatistiques2(dto.getStatistiques2());
         entity.setStatistiques3(dto.getStatistiques3());
-        entity.setEcheance(dto.getEcheance());
+//        entity.setEcheance(dto.getEcheance());
         entity.setIban(dto.getIban());
         entity.setBic(dto.getBic());
         entity.setContactEmail(dto.getContactEmail());

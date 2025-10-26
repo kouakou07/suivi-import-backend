@@ -1,18 +1,20 @@
 package com.example.suivie_importBackend.service;
 
 import com.example.suivie_importBackend.Enum.Deletion;
-import com.example.suivie_importBackend.Enum.TypeFournisseur;
 import com.example.suivie_importBackend.dto.FournisseurCentraleAssociationResponseDto;
 import com.example.suivie_importBackend.dto.FournisseurCentraleDto;
 import com.example.suivie_importBackend.models.FournisseurCentraleM;
 import com.example.suivie_importBackend.models.FournisseurM;
+import com.example.suivie_importBackend.models.TypeFournisseur;
 import com.example.suivie_importBackend.repository.FournisseurCentraleRepository;
 import com.example.suivie_importBackend.repository.FournisseurRepository;
+import com.example.suivie_importBackend.repository.TypeFournisseurRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -20,11 +22,12 @@ public class FournisseurCentraleService {
 
     private final FournisseurCentraleRepository fournisseurCentraleRepository;
     private final FournisseurRepository fournisseurRepository;
+    private final TypeFournisseurRepository typeFournisseurRepository;
 
-    public FournisseurCentraleService(FournisseurCentraleRepository fournisseurCentraleRepository,
-                                      FournisseurRepository fournisseurRepository) {
+    public FournisseurCentraleService(FournisseurCentraleRepository fournisseurCentraleRepository, FournisseurRepository fournisseurRepository, TypeFournisseurRepository typeFournisseurRepository) {
         this.fournisseurCentraleRepository = fournisseurCentraleRepository;
         this.fournisseurRepository = fournisseurRepository;
+        this.typeFournisseurRepository = typeFournisseurRepository;
     }
 
     /**
@@ -34,7 +37,8 @@ public class FournisseurCentraleService {
     public List<FournisseurCentraleM> associerFournisseursACentrale(Long idFournisseurCentrale, List<Long> fournisseursIds) {
         FournisseurM centrale = fournisseurRepository.findByIdAndDeleted(idFournisseurCentrale, Deletion.NO)
                 .orElseThrow(() -> new RuntimeException("Centrale introuvable"));
-        if (centrale.getType() != TypeFournisseur.CENTRALE) {
+
+        if (centrale.getTypeFournisseur() == null || !centrale.getTypeFournisseur().equals("CENTRALE")) {
             throw new RuntimeException("Le fournisseur spécifié n’est pas une centrale !");
         }
         List<FournisseurCentraleM> newAssociations = new ArrayList<>();
@@ -42,7 +46,7 @@ public class FournisseurCentraleService {
             for (Long fournisseurId : fournisseursIds) {
                 FournisseurM fournisseur = fournisseurRepository.findByIdAndDeleted(fournisseurId, Deletion.NO)
                         .orElseThrow(() -> new RuntimeException("Fournisseur simple introuvable"));
-                if (fournisseur.getType() ==  TypeFournisseur.CENTRALE) {
+                if (fournisseur.getTypeFournisseur() != null && fournisseur.getTypeFournisseur().equals("CENTRALE")) {
                     throw new RuntimeException("Impossible d’associer un fournisseur central à un autre central !");
                 }
                 FournisseurCentraleM association = FournisseurCentraleM.builder()

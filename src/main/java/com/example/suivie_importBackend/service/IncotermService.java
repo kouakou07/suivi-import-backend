@@ -4,26 +4,42 @@ import com.example.suivie_importBackend.Enum.Deletion;
 import com.example.suivie_importBackend.Mapper.IncotermMapper;
 import com.example.suivie_importBackend.dto.IncotermDto;
 import com.example.suivie_importBackend.models.Incoterm;
+import com.example.suivie_importBackend.models.ModeTransport;
+import com.example.suivie_importBackend.models.ResponsableVendeur;
 import com.example.suivie_importBackend.repository.IncotermRepository;
+import com.example.suivie_importBackend.repository.ModeTransportRepository;
+import com.example.suivie_importBackend.repository.ResponsableVendeurRepository;
 import com.example.suivie_importBackend.vo.IncotermVO;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @Service
 public class IncotermService {
+
+    private final ModeTransportRepository modeTransportRepository;
+    private final ResponsableVendeurRepository responsableVendeurRepository;
     private final IncotermRepository incotermRepository;
 
-    public IncotermService(IncotermRepository incotermRepository) {
+    public IncotermService(IncotermRepository incotermRepository, ModeTransportRepository modeTransportRepository, ResponsableVendeurRepository responsableVendeurRepository) {
         this.incotermRepository = incotermRepository;
+        this.modeTransportRepository = modeTransportRepository;
+        this.responsableVendeurRepository = responsableVendeurRepository;
     }
 
-    @Transactional
     public IncotermDto enregistrer(IncotermVO vo) {
-        Incoterm entity = IncotermMapper.versEntite(vo);
+        ModeTransport modeTransport = modeTransportRepository.findFirstByIdAndDeleted(vo.getModeTransportId(),Deletion.NO)
+                .orElseThrow(() -> new NoSuchElementException("Mode de transport non trouvé"));
+
+        ResponsableVendeur responsableVendeur = responsableVendeurRepository.findFirstByIdAndDeleted(vo.getResponsableVendeurId(),Deletion.NO)
+                .orElseThrow(() -> new NoSuchElementException("Responsable vendeur non trouvé"));
+
+        Incoterm entity = IncotermMapper.versEntite(vo, modeTransport, responsableVendeur);
         Incoterm saved = incotermRepository.save(entity);
+
         return IncotermMapper.versDTO(saved);
     }
 
@@ -37,30 +53,36 @@ public class IncotermService {
 
     @Transactional(Transactional.TxType.SUPPORTS)
     public Page<IncotermDto> listerTousAvecPagination(int page) {
-        Page<Incoterm>  incoterms = incotermRepository.findAllByDeleted(Deletion.NO, PageRequest.of(page, 10));
-              return  incoterms.map(IncotermMapper::versDTO);
+        Page<Incoterm> incoterms = incotermRepository.findAllByDeleted(Deletion.NO, PageRequest.of(page, 10));
+        return incoterms.map(IncotermMapper::versDTO);
     }
 
-    @Transactional
     public IncotermDto modifier(Long id, IncotermVO vo) {
-        return incotermRepository.findById(id)
+        ModeTransport modeTransport = modeTransportRepository.findById(vo.getModeTransportId())
+                .orElseThrow(() -> new NoSuchElementException("Mode de transport non trouvé"));
+
+        ResponsableVendeur responsableVendeur = responsableVendeurRepository.findFirstByIdAndDeleted(vo.getResponsableVendeurId(),Deletion.NO)
+                .orElseThrow(() -> new NoSuchElementException("Responsable vendeur non trouvé"));
+
+        return incotermRepository.findByIdAndDeleted(id,Deletion.NO)
                 .map(existing -> {
-                    existing.setIntercoterm(vo.getIncoterm());
+                    existing.setIncoterm(vo.getIncoterm());
                     existing.setSignification(vo.getSignification());
-                    existing.setModeTransport(vo.getModeTransport());
-                    existing.setResponsableVendeur(vo.getResponsableVendeur());
+                    existing.setModeTransport(modeTransport);
+                    existing.setResponsableVendeur(responsableVendeur);
                     Incoterm updated = incotermRepository.save(existing);
                     return IncotermMapper.versDTO(updated);
                 })
                 .orElseThrow(() -> new RuntimeException("Incoterm non trouvé"));
     }
 
-    @Transactional
     public boolean supprimer(Long id) {
-        if (incotermRepository.existsById(id)) {
-            incotermRepository.deleteById(id);
-            return true;
-        }
-        return false;
+        return incotermRepository.findByIdAndDeleted(id,Deletion.NO)
+                .map(incoterm -> {
+                    incoterm.setDeleted(true);
+                    incotermRepository.save(incoterm);
+                    return true;
+                })
+                .orElse(false);
     }
 }

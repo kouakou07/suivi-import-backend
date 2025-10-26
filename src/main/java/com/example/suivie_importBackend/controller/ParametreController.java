@@ -2,10 +2,7 @@ package com.example.suivie_importBackend.controller;
 
 
 import com.example.suivie_importBackend.dto.*;
-import com.example.suivie_importBackend.models.Devise;
-import com.example.suivie_importBackend.models.FamilleCentrale;
-import com.example.suivie_importBackend.models.ModeEnvoi;
-import com.example.suivie_importBackend.models.Pays;
+import com.example.suivie_importBackend.models.*;
 import com.example.suivie_importBackend.service.ParametreService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -14,6 +11,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api")
@@ -56,32 +55,33 @@ public class ParametreController {
     }
 
     @Secured({"ROLE_ADMIN", "ROLE_VALIDATEUR", "ROLE_USER"})
-    @PostMapping("/modeEnvoi/creer")
-    public ResponseEntity<ModeEnvoi> creerModeEnvoi(@RequestBody ModeEnvoi modeEnvoi) {
+    @PostMapping("/modes-envoie/ajouter")
+    public ResponseEntity<ModeEnvoi> creerModeEnvoi(@RequestBody ModeEnvoiDto modeEnvoi) {
         ModeEnvoi enregistreModeEnvoi = parametreService.creerModeEnvoi(modeEnvoi);
         return ResponseEntity.status(HttpStatus.CREATED).body(enregistreModeEnvoi);
     }
 
     @Secured({"ROLE_ADMIN", "ROLE_VALIDATEUR", "ROLE_USER"})
-    @PutMapping("/modeEnvoi/modifier")
-    public ResponseEntity<ModeEnvoiDto> modifierModeEnvoi(@RequestBody ModeEnvoiDto modeEnvoiDto) {
-        ModeEnvoiDto modeMisAJour = parametreService.mettreAJourModeEnvoi(modeEnvoiDto);
+    @PostMapping("/modes-envoie/editer/{id}")
+    public ResponseEntity<ModeEnvoiDto> modifierModeEnvoi(
+            @PathVariable Long id,
+            @RequestBody ModeEnvoiDto modeEnvoiDto
+    ) {
+        ModeEnvoiDto modeMisAJour = parametreService.mettreAJourModeEnvoi(id, modeEnvoiDto);
         return ResponseEntity.ok(modeMisAJour);
     }
 
     @Secured({"ROLE_ADMIN", "ROLE_VALIDATEUR", "ROLE_USER"})
-    @GetMapping("/modeEnvoi/liste")
+    @GetMapping("/modes-envoie/liste/{page}")
     public ResponseEntity<Page<ModeEnvoiListDto>> recupererModeEnvoi(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "5") int size
+            @RequestParam(defaultValue = "0") int page
     ) {
-        Pageable pageable = PageRequest.of(page, size);
-        Page<ModeEnvoiListDto> modePage = parametreService.recupererModeEnvoi(pageable);
+        Page<ModeEnvoiListDto> modePage = parametreService.recupererModeEnvoi(page);
         return ResponseEntity.ok(modePage);
     }
 
     @Secured({"ROLE_ADMIN", "ROLE_VALIDATEUR", "ROLE_USER"})
-    @DeleteMapping("/modeEnvoi/supprimer/{id}")
+    @PostMapping("/modes-envoie/supprimer/{id}")
     public ResponseEntity<Void> supprimerModeEnvoi(@PathVariable Long id) {
         boolean deleted = parametreService.supprimerModeEnvoi(id);
         return deleted ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
@@ -118,34 +118,193 @@ public class ParametreController {
     }
 
     @Secured({"ROLE_ADMIN", "ROLE_VALIDATEUR", "ROLE_USER"})
-    @PostMapping("/familleCentrale/creer")
+    @PostMapping("/familles-centrales/ajouter")
     public ResponseEntity<FamilleCentrale> creerFamilleCentrale(@RequestBody FamilleCentrale familleCentrale) {
         FamilleCentrale enregistreFamille1 = parametreService.creerFamilleCentrale(familleCentrale);
         return ResponseEntity.status(HttpStatus.CREATED).body(enregistreFamille1);
     }
 
     @Secured({"ROLE_ADMIN", "ROLE_VALIDATEUR", "ROLE_USER"})
-    @PutMapping("/familleCentrale/modifier")
-    public ResponseEntity<FamilleCentraleDto> modifierFamilleCentrale(@RequestBody FamilleCentraleDto familleCentraleDto) {
-        FamilleCentraleDto familleMisAJour = parametreService.mettreAJourFamilleCentrale(familleCentraleDto);
+    @PostMapping("/familles-centrales/editer/{id}")
+    public ResponseEntity<FamilleCentraleDto> modifierFamilleCentrale(@PathVariable Long id, @RequestBody FamilleCentraleDto familleCentraleDto) {
+        FamilleCentraleDto familleMisAJour = parametreService.mettreAJourFamilleCentrale(id,familleCentraleDto);
         return ResponseEntity.ok(familleMisAJour);
     }
 
     @Secured({"ROLE_ADMIN", "ROLE_VALIDATEUR", "ROLE_USER"})
-    @GetMapping("/familleCentrale/liste")
+    @GetMapping("/familles-centrales/liste/{page}")
     public ResponseEntity<Page<FamilleCentraleDtoList>> recupererFamilleCentrale(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "5") int size
+            @RequestParam(defaultValue = "0") int page
     ) {
-        Pageable pageable = PageRequest.of(page, size);
-        Page<FamilleCentraleDtoList> familleCentralePage = parametreService.recupererFamilleCentrale(pageable);
+        Page<FamilleCentraleDtoList> familleCentralePage = parametreService.recupererFamilleCentrale(page);
         return ResponseEntity.ok(familleCentralePage);
     }
 
     @Secured({"ROLE_ADMIN", "ROLE_VALIDATEUR", "ROLE_USER"})
-    @DeleteMapping("/familleCentrale/supprimer/{id}")
+    @PostMapping("/familles-centrales/supprimer/{id}")
     public ResponseEntity<Void> supprimerFamilleCentrale(@PathVariable Long id) {
         boolean deleted = parametreService.supprimerFamilleCentrale(id);
+        return deleted ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
+    }
+
+    @Secured({"ROLE_ADMIN", "ROLE_VALIDATEUR", "ROLE_USER"})
+    @PostMapping("/type-fournisseurs/ajouter")
+    public ResponseEntity<TypeFournisseur> creerTypeFournisseur(@RequestBody TypeFournisseurDto typeFournisseur) {
+        TypeFournisseur enregistreTypeFournisseur = parametreService.creerTypeFournisseur(typeFournisseur);
+        return ResponseEntity.status(HttpStatus.CREATED).body(enregistreTypeFournisseur);
+    }
+
+    @Secured({"ROLE_ADMIN", "ROLE_VALIDATEUR", "ROLE_USER"})
+    @PostMapping("/type-fournisseurs/editer/{id}")
+    public ResponseEntity<TypeFournisseurDto> modifierTypeFournisseur(@PathVariable Long id, @RequestBody TypeFournisseurDto typeFournisseurDto) {
+        TypeFournisseurDto typeFournisseurMisAJour = parametreService.mettreAJourTypeFournisseur(id, typeFournisseurDto);
+        return ResponseEntity.ok(typeFournisseurMisAJour);
+    }
+
+    @Secured({"ROLE_ADMIN", "ROLE_VALIDATEUR", "ROLE_USER"})
+    @GetMapping("/type-fournisseurs/liste/{page}")
+    public ResponseEntity<Page<TypeFournisseurDtoListe>> recupererTypeFournisseur(
+            @PathVariable int page
+    ) {
+        Page<TypeFournisseurDtoListe> typeFournisseurPage = parametreService.recupererTypeFournisseur(page);
+        return ResponseEntity.ok(typeFournisseurPage);
+    }
+
+    @Secured({"ROLE_ADMIN", "ROLE_VALIDATEUR", "ROLE_USER"})
+    @PostMapping("/type-fournisseurs/supprimer/{id}")
+    public ResponseEntity<Void> supprimerTypeFournisseur(@PathVariable Long id) {
+        boolean deleted = parametreService.supprimerTypeFournisseur(id);
+        return deleted ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
+    }
+
+    @Secured({"ROLE_ADMIN", "ROLE_VALIDATEUR", "ROLE_USER"})
+    @PostMapping("/departements/ajouter")
+    public ResponseEntity<Departement> creerDepartement(@RequestBody DepartementDto departementDto) {
+        Departement enregistreDepartement = parametreService.creerDepartement(departementDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(enregistreDepartement);
+    }
+
+    @Secured({"ROLE_ADMIN", "ROLE_VALIDATEUR", "ROLE_USER"})
+    @PostMapping("/departements/editer/{id}")
+    public ResponseEntity<DepartementDto> modifierDepartement(@PathVariable Long id, @RequestBody DepartementDto departementDto) {
+        DepartementDto mettreAJourDepartement = parametreService.mettreAJourDepartement(id, departementDto);
+        return ResponseEntity.ok(mettreAJourDepartement);
+    }
+
+    @Secured({"ROLE_ADMIN", "ROLE_VALIDATEUR", "ROLE_USER"})
+    @GetMapping("/departements/liste/{page}")
+    public ResponseEntity<Page<DepartementDtoListe>> recupererDepartement(
+            @PathVariable int page
+    ) {
+        Page<DepartementDtoListe> departementDtoListes = parametreService.recupererDepartement(page);
+        return ResponseEntity.ok(departementDtoListes);
+    }
+
+    @Secured({"ROLE_ADMIN", "ROLE_VALIDATEUR", "ROLE_USER"})
+    @PostMapping("/departements/supprimer/{id}")
+    public ResponseEntity<Void> supprimerDepartement(@PathVariable Long id) {
+        boolean deleted = parametreService.supprimerDepartement(id);
+        return deleted ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
+    }
+
+    @Secured({"ROLE_ADMIN", "ROLE_VALIDATEUR", "ROLE_USER"})
+    @PostMapping("/mode-paiements/ajouter")
+    public ResponseEntity<ModePaiement> creerModePaiement(@RequestBody ModePaiementDto modePaiementDto) {
+        ModePaiement enregistreModePaiement = parametreService.creerModePaiement(modePaiementDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(enregistreModePaiement);
+    }
+
+    @Secured({"ROLE_ADMIN", "ROLE_VALIDATEUR", "ROLE_USER"})
+    @PostMapping("/mode-paiements/editer/{id}")
+    public ResponseEntity<ModePaiementDto> modifierModePaiement(@PathVariable Long id, @RequestBody ModePaiementDto modePaiementDto) {
+        ModePaiementDto mettreAJourModePaiement = parametreService.mettreAJourModePaiement(id, modePaiementDto);
+        return ResponseEntity.ok(mettreAJourModePaiement);
+    }
+
+    @Secured({"ROLE_ADMIN", "ROLE_VALIDATEUR", "ROLE_USER"})
+    @GetMapping("/mode-paiements/liste/{page}")
+    public ResponseEntity<Page<ModePaiementDtoListe>> recupererModePaiement(
+            @PathVariable int page
+    ) {
+        Page<ModePaiementDtoListe> modePaiementDtoListes = parametreService.recupererModePaiement(page);
+        return ResponseEntity.ok(modePaiementDtoListes);
+    }
+
+    @Secured({"ROLE_ADMIN", "ROLE_VALIDATEUR", "ROLE_USER"})
+    @PostMapping("/mode-paiements/supprimer/{id}")
+    public ResponseEntity<Void> supprimerModePaiement(@PathVariable Long id) {
+        boolean deleted = parametreService.supprimerModePaiement(id);
+        return deleted ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
+    }
+
+    @Secured({"ROLE_ADMIN", "ROLE_VALIDATEUR", "ROLE_USER"})
+    @PostMapping("/modes-transports/ajouter")
+    public ResponseEntity<ModeTransport> creerModeTransport(@RequestBody ModeTransportDto modeTransportDto) {
+        ModeTransport enregistreModeTransport = parametreService.creerModeTransport(modeTransportDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(enregistreModeTransport);
+    }
+
+    @Secured({"ROLE_ADMIN", "ROLE_VALIDATEUR", "ROLE_USER"})
+    @PostMapping("/modes-transports/editer/{id}")
+    public ResponseEntity<ModeTransportDto> modifierModeTransport(@PathVariable Long id, @RequestBody ModeTransportDto modeTransportDto) {
+        ModeTransportDto mettreAJourModeTransport = parametreService.mettreAJourModeTransport(id, modeTransportDto);
+        return ResponseEntity.ok(mettreAJourModeTransport);
+    }
+
+    @Secured({"ROLE_ADMIN", "ROLE_VALIDATEUR", "ROLE_USER"})
+    @GetMapping("/modes-transports/liste/{page}")
+    public ResponseEntity<Page<ModeTransportDtoListe>> recupererModeTransport(
+            @PathVariable int page
+    ) {
+        Page<ModeTransportDtoListe> modeTransportDtoListes = parametreService.recupererModeTransport(page);
+        return ResponseEntity.ok(modeTransportDtoListes);
+    }
+
+    @Secured({"ROLE_ADMIN", "ROLE_VALIDATEUR", "ROLE_USER"})
+    @GetMapping("/modes-transports/liste")
+    public ResponseEntity<List<ModeTransportDtoListe>> recupererListeSansPagination() {
+        return ResponseEntity.ok(parametreService.recupererModeTransportSansPagination());
+    }
+
+    @Secured({"ROLE_ADMIN", "ROLE_VALIDATEUR", "ROLE_USER"})
+    @PostMapping("/modes-transports/supprimer/{id}")
+    public ResponseEntity<Void> supprimerModeTransport(@PathVariable Long id) {
+        boolean deleted = parametreService.supprimerModeTransport(id);
+        return deleted ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
+    }
+
+    @Secured({"ROLE_ADMIN", "ROLE_VALIDATEUR", "ROLE_USER"})
+    @PostMapping("/responsabilites-vendeurs/ajouter")
+    public ResponseEntity<ResponsableVendeur> creerResponsableVendeur(@RequestBody ResponsableVendeurDto dto) {
+        ResponsableVendeur enregistre = parametreService.creerResponsableVendeur(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(enregistre);
+    }
+
+    @Secured({"ROLE_ADMIN", "ROLE_VALIDATEUR", "ROLE_USER"})
+    @PostMapping("/responsabilites-vendeurs/editer/{id}")
+    public ResponseEntity<ResponsableVendeurDto> modifierResponsableVendeur(@PathVariable Long id, @RequestBody ResponsableVendeurDto dto) {
+        ResponsableVendeurDto mettreAJour = parametreService.mettreAJourResponsableVendeur(id, dto);
+        return ResponseEntity.ok(mettreAJour);
+    }
+
+    @Secured({"ROLE_ADMIN", "ROLE_VALIDATEUR", "ROLE_USER"})
+    @GetMapping("/responsabilites-vendeurs/liste/{page}")
+    public ResponseEntity<Page<ResponsableVendeurDtoListe>> recupererResponsableVendeur(@PathVariable int page) {
+        Page<ResponsableVendeurDtoListe> liste = parametreService.recupererResponsableVendeur(page);
+        return ResponseEntity.ok(liste);
+    }
+
+    @Secured({"ROLE_ADMIN", "ROLE_VALIDATEUR", "ROLE_USER"})
+    @GetMapping("/responsabilites-vendeurs/liste")
+    public ResponseEntity<List<ResponsableVendeurDtoListe>> recupererResponsableVendeur() {
+       return ResponseEntity.ok(parametreService.recupererResponsableVendeurAvecPagnination());
+
+    }
+
+    @Secured({"ROLE_ADMIN", "ROLE_VALIDATEUR", "ROLE_USER"})
+    @PostMapping("/responsabilites-vendeurs/supprimer/{id}")
+    public ResponseEntity<Void> supprimerResponsableVendeur(@PathVariable Long id) {
+        boolean deleted = parametreService.supprimerResponsableVendeur(id);
         return deleted ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
     }
 }

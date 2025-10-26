@@ -40,7 +40,10 @@ public class Transitaire extends BaseM {
     @ManyToOne
     @JoinColumn(name = "mode_paiement_id")
     private ModePaiement modePaiement;
-    private String echeance;
+//    @ManyToOne
+//    @JoinColumn(name = "echeance_id")
+//    private Echeance echeance;
+
     private String iban;
     private String bic;
     @Column(name = "contact_Email")

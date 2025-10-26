@@ -1,6 +1,7 @@
 package com.example.suivie_importBackend.vo;
 
 import com.example.suivie_importBackend.Enum.ModeTransport;
+import com.example.suivie_importBackend.models.ResponsableVendeur;
 import lombok.*;
 
 @Getter
@@ -11,6 +12,6 @@ import lombok.*;
 public class IncotermVO {
     private String incoterm;
     private String signification;
-    private ModeTransport modeTransport;
-    private String responsableVendeur;
+    private Long modeTransportId;
+    private Long responsableVendeurId;
 }

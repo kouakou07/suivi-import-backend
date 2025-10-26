@@ -27,15 +27,15 @@ public class FournisseurDto {
     private String statistiques1;
     private String statistiques2;
     private String statistiques3;
-    private String type;
-    private Long modePaiementId;
-    private String echeance;
+    private Long   typeFournisseur;
+    private Long   modePaiementId;
+    private Long   echeanceId;
     private String iban;
     private String bic;
     private String contactEmail;
     private String contactFonction;
     private String contactPrenoms;
     private String contactNom;
-    private Long deviseId;
+    private Long  deviseId;
 
 }
