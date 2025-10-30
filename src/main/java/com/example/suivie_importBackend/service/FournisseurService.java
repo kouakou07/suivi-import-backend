@@ -2,6 +2,7 @@ package com.example.suivie_importBackend.service;
 
 import com.example.suivie_importBackend.Enum.Deletion;
 import com.example.suivie_importBackend.dto.FournisseurDto;
+import com.example.suivie_importBackend.dto.ListeFournisseurCentraleDto;
 import com.example.suivie_importBackend.models.Devise;
 import com.example.suivie_importBackend.models.FournisseurM;
 import com.example.suivie_importBackend.models.ModePaiement;
@@ -41,6 +42,22 @@ public class FournisseurService {
                 .stream()
                 .map(this::mapToDto)
                 .collect(Collectors.toList());
+    }
+
+    public List<ListeFournisseurCentraleDto> recupererTousLesFournisseursCentrale() {
+        List<FournisseurM> fournisseurs = fournisseurRepository.findByTypeFournisseur_LibelleAndDeleted("CENTRALE", Deletion.NO);
+        System.out.println("Résultat trouvé : " + fournisseurs.size());
+        fournisseurs.forEach(f -> System.out.println(f.getIntituleFournisseur() + " - " + f.getTypeFournisseur().getLibelle()));
+
+        return fournisseurs.stream().map(this::mapToFournisseurCentraleDto).toList();
+    }
+
+    private ListeFournisseurCentraleDto mapToFournisseurCentraleDto(FournisseurM fournisseur) {
+        return ListeFournisseurCentraleDto.builder()
+                .id(fournisseur.getId())
+                .codeFournisseur(fournisseur.getCodeFournisseur())
+                .intituleFournisseur(fournisseur.getIntituleFournisseur())
+                .build();
     }
 
     public Page<FournisseurDto> recupererTousLesFournisseursAvecPagination(int page) {

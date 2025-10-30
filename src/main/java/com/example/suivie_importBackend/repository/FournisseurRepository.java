@@ -1,6 +1,7 @@
 package com.example.suivie_importBackend.repository;
 
 import com.example.suivie_importBackend.models.FournisseurM;
+import com.example.suivie_importBackend.models.TypeFournisseur;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -15,11 +16,11 @@ public interface FournisseurRepository extends JpaRepository<FournisseurM, Long>
 
     List<FournisseurM> findAllByDeleted(Boolean deletion);
 
+    List<FournisseurM> findByTypeFournisseur_LibelleAndDeleted(String libelle, Boolean deletion);
+
     Page<FournisseurM> findAllByDeleted(Boolean deletion, Pageable page);
 
     Optional<FournisseurM> findFirstByIdAndDeleted(Long id, Boolean deletion);
-
-//    FournisseurM  findByCodeFournisseurAndDeleted(String codeFournisseur, Boolean deletion);
 
     Optional<FournisseurM> findByIdAndDeleted(Long id, Boolean deletion);
 

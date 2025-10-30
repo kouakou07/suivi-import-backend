@@ -8,9 +8,11 @@ import lombok.*;
 @Setter
 @Builder
 public class IncotermDto {
-    Long id;
-    String incoterm;
-    String signification;
-    Long modeTransportId;
-    Long responsableVendeurId;
+    private Long id;
+    private String incoterm;
+    private String signification;
+    private Long modeTransportId;
+    private Long responsableVendeurId;
+    private ModeTransportDto modeTransport;
+    private ResponsableVendeurDto responsableVendeur;
 }

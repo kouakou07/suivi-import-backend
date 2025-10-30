@@ -14,4 +14,5 @@ import lombok.*;
 public class UniteVente extends BaseM {
 
     private String intitule;
+
 }

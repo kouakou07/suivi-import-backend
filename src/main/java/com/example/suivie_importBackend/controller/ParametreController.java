@@ -5,13 +5,10 @@ import com.example.suivie_importBackend.dto.*;
 import com.example.suivie_importBackend.models.*;
 import com.example.suivie_importBackend.service.ParametreService;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
 @RestController
@@ -44,13 +41,20 @@ public class ParametreController {
     }
 
     @Secured({"ROLE_ADMIN", "ROLE_VALIDATEUR", "ROLE_USER"})
-    @GetMapping("/pays/liste")
+    @GetMapping("/pays/liste/{page}")
     public ResponseEntity<Page<PaysDtoList>> recupererPays(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "5") int size
+            @RequestParam(defaultValue = "0") int page
     ) {
-        Pageable pageable = PageRequest.of(page, size);
-        Page<PaysDtoList> paysPage = parametreService.recupererPays(pageable);
+
+        Page<PaysDtoList> paysPage = parametreService.recupererPaysAvecPagination(page);
+        return ResponseEntity.ok(paysPage);
+    }
+
+    @Secured({"ROLE_ADMIN", "ROLE_VALIDATEUR", "ROLE_USER"})
+    @GetMapping("/pays/liste")
+    public ResponseEntity<List<PaysDtoList>> recupererPays(
+    ) {
+        List<PaysDtoList> paysPage = parametreService.recupererPays();
         return ResponseEntity.ok(paysPage);
     }
 
@@ -106,7 +110,15 @@ public class ParametreController {
     public ResponseEntity<Page<DeviseDtoList>> recupererDevise(
             @RequestParam(defaultValue = "0") int page
     ) {
-        Page<DeviseDtoList> devisePage = parametreService.recupererDevise(page);
+        Page<DeviseDtoList> devisePage = parametreService.recupererDeviseAvecPagination(page);
+        return ResponseEntity.ok(devisePage);
+    }
+
+    @Secured({"ROLE_ADMIN", "ROLE_VALIDATEUR", "ROLE_USER"})
+    @GetMapping("/devises/liste")
+    public ResponseEntity<List<DeviseDtoList>> recupererDevise(
+    ) {
+        List<DeviseDtoList> devisePage = parametreService.recupererDevise();
         return ResponseEntity.ok(devisePage);
     }
 
@@ -231,6 +243,13 @@ public class ParametreController {
     }
 
     @Secured({"ROLE_ADMIN", "ROLE_VALIDATEUR", "ROLE_USER"})
+    @GetMapping("/mode-paiements/liste")
+    public ResponseEntity<List<ModePaiementDtoListe>> recupererModePaiement(
+    ) {
+        return ResponseEntity.ok(parametreService.recupererModePaiementSanspagination());
+    }
+
+    @Secured({"ROLE_ADMIN", "ROLE_VALIDATEUR", "ROLE_USER"})
     @PostMapping("/mode-paiements/supprimer/{id}")
     public ResponseEntity<Void> supprimerModePaiement(@PathVariable Long id) {
         boolean deleted = parametreService.supprimerModePaiement(id);
@@ -305,6 +324,74 @@ public class ParametreController {
     @PostMapping("/responsabilites-vendeurs/supprimer/{id}")
     public ResponseEntity<Void> supprimerResponsableVendeur(@PathVariable Long id) {
         boolean deleted = parametreService.supprimerResponsableVendeur(id);
+        return deleted ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
+    }
+
+    @Secured({"ROLE_ADMIN", "ROLE_VALIDATEUR", "ROLE_USER"})
+    @PostMapping("/unites-ventes/ajouter")
+    public ResponseEntity<UniteVente> creerUniteVente(@RequestBody UniteVenteDto dto) {
+        UniteVente enregistre = parametreService.creerUniteVente(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(enregistre);
+    }
+
+    @Secured({"ROLE_ADMIN", "ROLE_VALIDATEUR", "ROLE_USER"})
+    @PostMapping("/unites-ventes/editer/{id}")
+    public ResponseEntity<UniteVenteDto> modifierUniteVente(@PathVariable Long id, @RequestBody UniteVenteDto dto) {
+        UniteVenteDto mettreAJour = parametreService.mettreAJourUniteVente(id, dto);
+        return ResponseEntity.ok(mettreAJour);
+    }
+
+    @Secured({"ROLE_ADMIN", "ROLE_VALIDATEUR", "ROLE_USER"})
+    @GetMapping("/unites-ventes/liste/{page}")
+    public ResponseEntity<Page<UniteVenteDtoListe>> recupererUniteVente(@PathVariable int page) {
+        Page<UniteVenteDtoListe> liste = parametreService.recupererUniteVente(page);
+        return ResponseEntity.ok(liste);
+    }
+
+    @Secured({"ROLE_ADMIN", "ROLE_VALIDATEUR", "ROLE_USER"})
+    @GetMapping("/unites-ventes/liste")
+    public ResponseEntity<List<UniteVenteDtoListe>> recupererUniteVente() {
+        return ResponseEntity.ok(parametreService.recupererUniteVenteAvecPagination());
+    }
+
+    @Secured({"ROLE_ADMIN", "ROLE_VALIDATEUR", "ROLE_USER"})
+    @PostMapping("/unites-ventes/supprimer/{id}")
+    public ResponseEntity<Void> supprimerUniteVente(@PathVariable Long id) {
+        boolean deleted = parametreService.supprimerUniteVente(id);
+        return deleted ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
+    }
+
+    @Secured({"ROLE_ADMIN", "ROLE_VALIDATEUR", "ROLE_USER"})
+    @PostMapping("/echeances/ajouter")
+    public ResponseEntity<Echeance> creerEcheance(@RequestBody EcheanceDto dto) {
+        Echeance enregistre = parametreService.creerEcheance(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(enregistre);
+    }
+
+    @Secured({"ROLE_ADMIN", "ROLE_VALIDATEUR", "ROLE_USER"})
+    @PostMapping("/echeances/editer/{id}")
+    public ResponseEntity<EcheanceDto> modifierEcheance(@PathVariable Long id, @RequestBody EcheanceDto dto) {
+        EcheanceDto miseAJour = parametreService.mettreAJourEcheance(id, dto);
+        return ResponseEntity.ok(miseAJour);
+    }
+
+    @Secured({"ROLE_ADMIN", "ROLE_VALIDATEUR", "ROLE_USER"})
+    @GetMapping("/echeances/liste/{page}")
+    public ResponseEntity<Page<EcheanceDtoListe>> recupererEcheances(@PathVariable int page) {
+        Page<EcheanceDtoListe> liste = parametreService.recupererEcheances(page);
+        return ResponseEntity.ok(liste);
+    }
+
+    @Secured({"ROLE_ADMIN", "ROLE_VALIDATEUR", "ROLE_USER"})
+    @GetMapping("/echeances/liste")
+    public ResponseEntity<List<EcheanceDtoListe>> recupererToutesLesEcheances() {
+        return ResponseEntity.ok(parametreService.recupererToutesLesEcheances());
+    }
+
+    @Secured({"ROLE_ADMIN", "ROLE_VALIDATEUR", "ROLE_USER"})
+    @PostMapping("/echeances/supprimer/{id}")
+    public ResponseEntity<Void> supprimerEcheance(@PathVariable Long id) {
+        boolean deleted = parametreService.supprimerEcheance(id);
         return deleted ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
     }
 }

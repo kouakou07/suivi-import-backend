@@ -15,4 +15,6 @@ public interface ModePaiementRepository extends JpaRepository<ModePaiement,Long>
     Optional<ModePaiement> findFirstByIdAndDeleted(Long id, Boolean deletion);
 
     Page<ModePaiement> findAllByDeleted(Boolean deletion, Pageable pageable);
+
+    List<ModePaiement> findAllByDeleted(Boolean deletion);
 }

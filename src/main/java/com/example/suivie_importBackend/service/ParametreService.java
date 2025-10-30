@@ -6,7 +6,6 @@ import com.example.suivie_importBackend.models.*;
 import com.example.suivie_importBackend.repository.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -30,8 +29,12 @@ public class ParametreService {
     private final TypeFournisseurRepository typeFournisseurRepository;
     private final ModeTransportRepository modeTransportRepository;
     private final ResponsableVendeurRepository responsableVendeurRepository;
+    private final UniteVenteRepository uniteVenteRepository;
+    private final EcheanceRepository echeanceRepository;
+    private final BanqueRepository banqueRepository;
+    private final FournisseurRepository fournisseurRepository;
 
-    public ParametreService(PaysRepository paysRepository, ModeEnvoiRepository modeEnvoiRepository, ModePaiementRepository modePaiementRepository, DepartementRepository departementRepository, DeviseRepository deviseRepository, FamilleCentraleRepository familleCentraleRepository, TypeFournisseurRepository typeFournisseurRepository, ModeTransportRepository modeTransportRepository, ResponsableVendeurRepository responsableVendeurRepository) {
+    public ParametreService(PaysRepository paysRepository, ModeEnvoiRepository modeEnvoiRepository, ModePaiementRepository modePaiementRepository, DepartementRepository departementRepository, DeviseRepository deviseRepository, FamilleCentraleRepository familleCentraleRepository, TypeFournisseurRepository typeFournisseurRepository, ModeTransportRepository modeTransportRepository, ResponsableVendeurRepository responsableVendeurRepository, UniteVenteRepository uniteVenteRepository, EcheanceRepository echeanceRepository, BanqueRepository banqueRepository, FournisseurRepository fournisseurRepository) {
         this.paysRepository = paysRepository;
         this.modeEnvoiRepository = modeEnvoiRepository;
         this.modePaiementRepository = modePaiementRepository;
@@ -41,6 +44,10 @@ public class ParametreService {
         this.typeFournisseurRepository = typeFournisseurRepository;
         this.modeTransportRepository = modeTransportRepository;
         this.responsableVendeurRepository = responsableVendeurRepository;
+        this.uniteVenteRepository = uniteVenteRepository;
+        this.echeanceRepository = echeanceRepository;
+        this.banqueRepository = banqueRepository;
+        this.fournisseurRepository = fournisseurRepository;
     }
 
     @Transactional
@@ -64,13 +71,26 @@ public class ParametreService {
     }
 
     @Transactional(readOnly = true)
-    public Page<PaysDtoList> recupererPays(Pageable pageable) {
-        return paysRepository.findAllByDeleted(Deletion.NO, pageable)
+    public Page<PaysDtoList> recupererPaysAvecPagination(int page) {
+        return paysRepository.findAllByDeleted(Deletion.NO, PageRequest.of(page, 10))
                 .map(c -> PaysDtoList.builder()
                         .id(c.getId())
                         .intitule(c.getIntitule())
                         .build()
                 );
+    }
+
+    @Transactional(readOnly = true)
+    public List<PaysDtoList> recupererPays() {
+        return paysRepository.findAllByDeleted(Deletion.NO)
+                .stream()
+                .map(c -> PaysDtoList.builder()
+                        .id(c.getId())
+                        .intitule(c.getIntitule())
+                        .build()
+                )
+                .toList();
+
     }
 
     public boolean supprimerPays(Long id) {
@@ -147,13 +167,25 @@ public class ParametreService {
     }
 
     @Transactional(readOnly = true)
-    public Page<DeviseDtoList> recupererDevise(int page) {
+    public Page<DeviseDtoList> recupererDeviseAvecPagination(int page) {
         return deviseRepository.findAllByDeleted(Deletion.NO, PageRequest.of(page, 10))
                 .map(c -> DeviseDtoList.builder()
                         .id(c.getId())
                         .intitule(c.getIntitule())
                         .build()
                 );
+    }
+
+    @Transactional(readOnly = true)
+    public List<DeviseDtoList> recupererDevise() {
+        return deviseRepository.findAllByDeleted(Deletion.NO)
+                .stream()
+                .map(c -> DeviseDtoList.builder()
+                        .id(c.getId())
+                        .intitule(c.getIntitule())
+                        .build()
+                )
+                .toList();
     }
 
     public boolean supprimerDevise(Long id) {
@@ -313,6 +345,18 @@ public class ParametreService {
                 );
     }
 
+    @Transactional(readOnly = true)
+    public List<ModePaiementDtoListe> recupererModePaiementSanspagination() {
+        return modePaiementRepository.findAllByDeleted(Deletion.NO)
+                .stream()
+                .map(c -> ModePaiementDtoListe.builder()
+                        .id(c.getId())
+                        .intitule(c.getIntitule())
+                        .build()
+                )
+                .toList();
+    }
+
     public boolean supprimerModePaiement(Long id) {
         return modePaiementRepository.findFirstByIdAndDeleted(id, Deletion.NO)
                 .map(modePaiement -> {
@@ -420,4 +464,167 @@ public class ParametreService {
                 .orElse(false);
     }
 
+    /**
+     * Enregistrer une nouvelle unité de vente
+     */
+    @Transactional
+    public UniteVente creerUniteVente(UniteVenteDto dto) {
+        UniteVente enregistrer = new UniteVente();
+        enregistrer.setIntitule(dto.libelle());
+        return uniteVenteRepository.save(enregistrer);
+    }
+
+    /**
+     * Mettre à jour une unité de vente existante
+     */
+    @Transactional
+    public UniteVenteDto mettreAJourUniteVente(Long id, UniteVenteDto dto) {
+        UniteVente entity = uniteVenteRepository.findFirstByIdAndDeleted(id, Deletion.NO)
+                .orElseThrow(() -> new NoSuchElementException("L’unité de vente est introuvable"));
+        entity.setIntitule(dto.libelle());
+        UniteVente updated = uniteVenteRepository.save(entity);
+        return new UniteVenteDto(updated.getId(), updated.getIntitule());
+    }
+
+    /**
+     * Récupérer les unités de vente avec pagination
+     */
+    @Transactional(readOnly = true)
+    public Page<UniteVenteDtoListe> recupererUniteVente(int page) {
+        return uniteVenteRepository.findAllByDeleted(Deletion.NO, PageRequest.of(page, 10))
+                .map(c -> UniteVenteDtoListe.builder()
+                        .id(c.getId())
+                        .libelle(c.getIntitule())
+                        .build()
+                );
+    }
+
+    /**
+     * Récupérer toutes les unités de vente sans pagination
+     */
+    @Transactional(readOnly = true)
+    public List<UniteVenteDtoListe> recupererUniteVenteAvecPagination() {
+        return uniteVenteRepository.findAllByDeleted(Deletion.NO)
+                .stream()
+                .map(c -> UniteVenteDtoListe.builder()
+                        .id(c.getId())
+                        .libelle(c.getIntitule())
+                        .build()
+                )
+                .toList();
+    }
+
+    /**
+     * Supprimer logiquement une unité de vente
+     */
+    @Transactional
+    public boolean supprimerUniteVente(Long id) {
+        return uniteVenteRepository.findFirstByIdAndDeleted(id, Deletion.NO)
+                .map(uniteVente -> {
+                    uniteVente.setDeleted(Deletion.YES);
+                    uniteVenteRepository.save(uniteVente);
+                    return true;
+                })
+                .orElse(false);
+    }
+
+    /**
+     * Enregistrer une nouvelle échéance
+     */
+    @Transactional
+    public Echeance creerEcheance(EcheanceDto dto) {
+        Echeance echeance = mapToEntity(dto, new Echeance());
+        return echeanceRepository.save(echeance);
+    }
+
+    /**
+     * Mettre à jour une échéance existante
+     */
+    @Transactional
+    public EcheanceDto mettreAJourEcheance(Long id, EcheanceDto dto) {
+        Echeance entity = echeanceRepository.findFirstByIdAndDeleted(id, Deletion.NO)
+                .orElseThrow(() -> new NoSuchElementException("L’échéance est introuvable"));
+
+        Echeance updated = echeanceRepository.save(mapToEntity(dto, entity));
+
+        return new EcheanceDto(
+                updated.getId(),
+                updated.getMontantApayer(),
+                updated.getBanque().getId(),
+                updated.getDevise().getId(),
+                updated.getFournisseurM().getId()
+        );
+    }
+
+    /**
+     * Récupérer les échéances avec pagination
+     */
+    @Transactional(readOnly = true)
+    public Page<EcheanceDtoListe> recupererEcheances(int page) {
+        return echeanceRepository.findAllByDeleted(Deletion.NO, PageRequest.of(page, 10))
+                .map(this::mapToDtoListe);
+    }
+
+    /**
+     * Récupérer toutes les échéances sans pagination
+     */
+    @Transactional(readOnly = true)
+    public List<EcheanceDtoListe> recupererToutesLesEcheances() {
+        return echeanceRepository.findAllByDeleted(Deletion.NO)
+                .stream()
+                .map(this::mapToDtoListe)
+                .toList();
+    }
+
+    /**
+     * Supprimer logiquement une échéance
+     */
+    @Transactional
+    public boolean supprimerEcheance(Long id) {
+        return echeanceRepository.findFirstByIdAndDeleted(id, Deletion.NO)
+                .map(echeance -> {
+                    echeance.setDeleted(Deletion.YES);
+                    echeanceRepository.save(echeance);
+                    return true;
+                })
+                .orElse(false);
+    }
+
+    /**
+     * Mapper un DTO vers une entité (création ou mise à jour)
+     */
+    private Echeance mapToEntity(EcheanceDto dto, Echeance entity) {
+        entity.setMontantApayer(dto.montantApayer());
+
+        entity.setBanque(banqueRepository.findById(dto.banqueId())
+                .orElseThrow(() -> new NoSuchElementException("Banque introuvable")));
+
+        entity.setDevise(deviseRepository.findById(dto.deviseId())
+                .orElseThrow(() -> new NoSuchElementException("Devise introuvable")));
+
+        FournisseurM fournisseur = fournisseurRepository.findByIdAndDeleted(dto.fournisseurId(), Deletion.NO)
+                .orElseThrow(() -> new NoSuchElementException("Fournisseur introuvable"));
+
+        if (fournisseur.getTypeFournisseur() == null
+                || !"CENTRALE".equalsIgnoreCase(fournisseur.getTypeFournisseur().getLibelle())) {
+            throw new IllegalArgumentException("Le fournisseur sélectionné doit être de type CENTRALE");
+        }
+
+        entity.setFournisseurM(fournisseur);
+
+        return entity;
+    }
+
+    /**
+     * Mapper une entité vers un DTO de liste
+     */
+    private EcheanceDtoListe mapToDtoListe(Echeance e) {
+        return EcheanceDtoListe.builder()
+                .id(e.getId())
+                .montantApayer(e.getMontantApayer())
+                .banqueNom(e.getBanque().getLibelle())
+                .deviseCode(e.getDevise().getIntitule())
+                .fournisseurNom(e.getFournisseurM().getIntituleFournisseur())
+                .build();
+    }
 }

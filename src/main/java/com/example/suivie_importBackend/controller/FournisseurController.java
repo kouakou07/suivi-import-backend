@@ -1,6 +1,7 @@
 package com.example.suivie_importBackend.controller;
 
 import com.example.suivie_importBackend.dto.FournisseurDto;
+import com.example.suivie_importBackend.dto.ListeFournisseurCentraleDto;
 import com.example.suivie_importBackend.service.FournisseurService;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -27,10 +28,16 @@ public class FournisseurController {
         return ResponseEntity.status(HttpStatus.CREATED).body(nouveauFournisseur);
     }
 
-    @Secured("ROLE_ADMIN")
+    @Secured({"ROLE_ADMIN", "ROLE_VALIDATEUR", "ROLE_USER"})
     @GetMapping("/fournisseur/liste-fournisseur")
     public List<FournisseurDto> recupererTousLesFournisseurs() {
         return fournisseurService.recupererTousLesFournisseurs();
+    }
+
+    @Secured({"ROLE_ADMIN", "ROLE_VALIDATEUR", "ROLE_USER"})
+    @GetMapping("/fournisseur-centrale/liste")
+    public List<ListeFournisseurCentraleDto> recupererTousLesFournisseursCentrale() {
+        return fournisseurService.recupererTousLesFournisseursCentrale();
     }
 
     @Secured({"ROLE_ADMIN", "ROLE_VALIDATEUR", "ROLE_USER"})

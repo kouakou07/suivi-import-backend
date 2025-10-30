@@ -1,5 +1,6 @@
 package com.example.suivie_importBackend.dto;
 
+
 import lombok.*;
 
 @AllArgsConstructor
@@ -7,10 +8,10 @@ import lombok.*;
 @Getter
 @Setter
 @Builder
-public class FournisseurDto {
+public class TransitaireDto {
     private Long id;
-    private String codeFournisseur;
-    private String intituleFournisseur;
+    private String codeTransitaire;
+    private String intituleTransitaire;
     private String nomContact;
     private String telephone;
     private String telecopie;
@@ -22,11 +23,7 @@ public class FournisseurDto {
     private String codePostal;
     private String ville;
     private String region;
-    private String pays;
-    private String statistiques1;
-    private String statistiques2;
-    private String statistiques3;
-    private Long   typeFournisseur;
+    private Long paysId;
     private Long   modePaiementId;
     private Long   echeanceId;
     private String iban;
@@ -36,5 +33,4 @@ public class FournisseurDto {
     private String contactPrenoms;
     private String contactNom;
     private Long  deviseId;
-
 }

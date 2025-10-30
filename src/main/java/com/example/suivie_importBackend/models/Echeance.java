@@ -1,8 +1,6 @@
 package com.example.suivie_importBackend.models;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.*;
 
 @AllArgsConstructor
@@ -14,9 +12,17 @@ import lombok.*;
 @Table(name = "echeances")
 public class Echeance extends BaseM {
 
-private Long montantApayer;
+    private Long montantApayer;
 
-//@Column(name = "banque")
-//private Banque banque;
+    @ManyToOne
+    @JoinColumn(name = "banque_id")
+    private Banque banque;
 
+    @ManyToOne
+    @JoinColumn(name = "devise_id")
+    private Devise devise;
+
+    @ManyToOne
+    @JoinColumn(name = "fournisseur_id")
+    private FournisseurM fournisseurM;
 }

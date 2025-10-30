@@ -2,6 +2,8 @@ package com.example.suivie_importBackend.Mapper;
 
 
 import com.example.suivie_importBackend.dto.IncotermDto;
+import com.example.suivie_importBackend.dto.ModeTransportDto;
+import com.example.suivie_importBackend.dto.ResponsableVendeurDto;
 import com.example.suivie_importBackend.models.Incoterm;
 import com.example.suivie_importBackend.models.ModeTransport;
 import com.example.suivie_importBackend.models.ResponsableVendeur;
@@ -20,12 +22,24 @@ public class IncotermMapper {
     }
 
     public static IncotermDto versDTO(Incoterm incoterm) {
-        return IncotermDto.builder()
-                .id(incoterm.getId())
-                .incoterm(incoterm.getIncoterm())
-                .signification(incoterm.getSignification())
-                .modeTransportId(incoterm.getModeTransport().getId())
-                .responsableVendeurId(incoterm.getResponsableVendeur().getId())
-                .build();
+        return new IncotermDto(
+                incoterm.getId(),
+                incoterm.getIncoterm(),
+                incoterm.getSignification(),
+                incoterm.getModeTransport() != null ? incoterm.getModeTransport().getId() : null,
+                incoterm.getResponsableVendeur() != null ? incoterm.getResponsableVendeur().getId() : null,
+                incoterm.getModeTransport() != null
+                        ? new ModeTransportDto(
+                        incoterm.getModeTransport().getId(),
+                        incoterm.getModeTransport().getIntitule()
+                )
+                        : null,
+                incoterm.getResponsableVendeur() != null
+                        ? new ResponsableVendeurDto(
+                        incoterm.getResponsableVendeur().getId(),
+                        incoterm.getResponsableVendeur().getLibelle()
+                )
+                        : null
+        );
     }
 }
